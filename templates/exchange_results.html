@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content%}
+<dic class="container">    
+    {% if currency_info.code != "unknown" %}
+        <img src="{{ url_for('static', filename=currency_info.flag) }}"
+            class="mx-auto d-block">
+        {% else %}
+        <p> This currency is uknown for us. Sorry.</p>
+    {% endif %}
+</div>
+{% endblock %}
