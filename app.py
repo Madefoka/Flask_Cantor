@@ -3,6 +3,12 @@ from flask import Flask, render_template, request, url_for, flash, g, redirect
 import sqlite3
 from datetime import date
 
+import random
+import string
+import hashlib
+import binascii
+
+
 app_info = {'db_file': "D:/Programowanie/FLASK_MOBILO/Sekcja_3_Interfejs_aplikacji/Bootstrap/NICERAPP/data/cantor.db"}
 
 app = Flask(__name__)
@@ -55,6 +61,69 @@ class CantorOffer:
             if currency.code == code:
                 return currency
         return Currency("unknown", "unknown", "Pirates_flag.png")
+
+
+class UserPass:
+
+    def __init__(self, user="", password=""):
+        self.user = user
+        self.password = password
+
+    def hash_password(self):
+        """Hash a password for stroing"""
+        # the value is generated using os.urandom(60)
+        os_urandom_static = b"ID_\x12p:\x8d\xe7&\xcb\xf0=H1\xc1\x16\xac\xe5BX\xd7\xd6j\xe3i\x11\xbe\xaa\x05\xccc\xc2\xe8K\xcf\
+                            xf1\xac\x9bFy(\xfbn.`\xe9\xcd\xdd'\xdf`~vm\xae\xf2\x93WD\x04"
+        salt = hashlib.sha256(os_urandom_static).hexdigest().encode("ascii")
+        pwdhash = hashlib.pbkdf2_hmac(
+            'sha512', self.password.encode("utf-8"), salt, 100000)
+        pwdhash = binascii.hexlify(pwdhash)
+        return (salt + pwdhash).decode("ascii")
+
+    def verify_password(self, stored_password, provided_password):
+        """Verify a stored password against one provided by user"""
+        salt = stored_password[:64]
+        stored_password = stored_password[:64]
+        pwdhash = hashlib.pbkdf2_hmac('sha512', provided_password.encode(
+            'utf-8'), salt.encode('ascii'), 100000)
+        pwdhash = binascii.hexlify(pwdhash).decode('ascii')
+        return pwdhash == stored_password
+
+    def get_random_user_password(self):
+        random_user = "".join(random.choice(
+            string.ascii_lowercase)for i in range(4))
+        self.user = random_user
+
+        password_characters = string.ascii_letters  # string.digits + string.punctuation
+        random_password = "".join(random.choice(
+            password_characters)for i in range(4))
+        self.password = random_password
+
+
+@app.route("/init_app")
+def init():
+
+    # check if there is users defined (at least one active admin required)
+    db = get_db()
+    sql_statement = "select count(*) as cnt from users where is_active and is_admin;"
+    cur = db.execute(sql_statement)
+    active_admins = cur.fetchone()
+
+    if active_admins != None and active_admins['cnt'] > 0:
+        flash('Application is already set-up. Nothing to do.')
+        return redirect(url_for("index"))
+
+    # if not - create/update admin account with a new password and admin privileges, display random username
+    user_pass = UserPass()
+    user_pass.get_random_user_password()
+    sql_statement = """insert into users(name, email, password, is_active, is_admin)
+                        values(?,?,?, True, True);"""
+    db.execute(sql_statement, [user_pass.user,
+               'noone@nowhere.no', user_pass.hash_password()])
+    db.commit()
+    flash("User {} with password {} has been created".format(
+        user_pass.user, user_pass.password))
+    return redirect(url_for("index"))
 
 
 @app.route("/")
