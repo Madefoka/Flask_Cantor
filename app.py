@@ -1,5 +1,5 @@
 from sqlite3.dbapi2 import SQLITE_TRANSACTION
-from flask import Flask, render_template, request, url_for, flash, g, redirect
+from flask import Flask, render_template, request, url_for, flash, g, redirect, session
 import sqlite3
 from datetime import date
 
@@ -98,6 +98,21 @@ class UserPass:
         random_password = "".join(random.choice(
             password_characters)for i in range(4))
         self.password = random_password
+        print(random_password)
+
+    def login_user(self):
+
+        db = get_db()
+        sql_statement = "select id, name, email, password, is_active, is_admin from users where name=?"
+        cur = db.execute(sql_statement, [self.user])
+        user_record = cur.fetchone()
+
+        if user_record != None and self.verify_password(user_record['password'], self.password):
+            return user_record
+        else:
+            self.user = None
+            self.password = None
+            return None
 
 
 @app.route("/init_app")
@@ -124,6 +139,36 @@ def init():
     flash("User {} with password {} has been created".format(
         user_pass.user, user_pass.password))
     return redirect(url_for("index"))
+
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+
+    if request.method == 'GET':
+        return render_template('login.html', active_menu='login')
+    else:
+        user_name = '' if 'user_name' not in request.form else request.form['user_name']
+        user_pass = '' if 'user_pass' not in request.form else request.form['user_pass']
+
+        login = UserPass(user_name, user_pass)
+        login_record = login.login_user()
+
+        if login_record != None:
+            session['user'] = user_name
+            flash('Logon succesfull, welcome {}'.format(user_name))
+            return redirect(url_for('index'))
+        else:
+            flash('Logon failed, try again')
+            return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+
+    if 'user' in session:
+        session.pop('user', None)
+        flash("You are logged out")
+    return redirect(url_for('login'))
 
 
 @app.route("/")
