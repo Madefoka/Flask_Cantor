@@ -15,9 +15,17 @@
           <li class="nav-item">
             <a class="nav-link {{'active' if active_menu=='history'}}" href="{{ url_for("history")}}">History</a>
           </li>
-          <li class="nav-item {{'active' if active_menu=='about'}}">
-            <a class="nav-link href="#" tabindex=1 aria-disabled="true">About</a>
+          <li class="nav-item">
+            <a class="nav-link {{'active' if active_menu=='about'}}" href="#" tabindex="-1" aria-disabled="true">About</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if active_menu=='login' }}" href="{{ url_for('login') }}" tabindex="-1">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ 'active' if active_menu=='logout' }}" href="{{ url_for('logout') }}" tabindex="-1">
+              Logout {{ session['user'] if 'user' in session }}</a>
+          </li>
+        
         </ul>
       </div>
     </div>

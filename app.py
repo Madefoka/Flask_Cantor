@@ -65,45 +65,44 @@ class CantorOffer:
 
 class UserPass:
 
-    def __init__(self, user="", password=""):
+    def __init__(self, user='', password=''):
         self.user = user
         self.password = password
 
     def hash_password(self):
-        """Hash a password for stroing"""
-        # the value is generated using os.urandom(60)
-        os_urandom_static = b"ID_\x12p:\x8d\xe7&\xcb\xf0=H1\xc1\x16\xac\xe5BX\xd7\xd6j\xe3i\x11\xbe\xaa\x05\xccc\xc2\xe8K\xcf\
-                            xf1\xac\x9bFy(\xfbn.`\xe9\xcd\xdd'\xdf`~vm\xae\xf2\x93WD\x04"
-        salt = hashlib.sha256(os_urandom_static).hexdigest().encode("ascii")
+        """Hash a password for storing."""
+        # the value generated using os.urandom(60)
+        os_urandom_static = b"ID_\x12p:\x8d\xe7&\xcb\xf0=H1\xc1\x16\xac\xe5BX\xd7\xd6j\xe3i\x11\xbe\xaa\x05\xccc\xc2\xe8K\xcf\xf1\xac\x9bFy(\xfbn.`\xe9\xcd\xdd'\xdf`~vm\xae\xf2\x93WD\x04"
+        salt = hashlib.sha256(os_urandom_static).hexdigest().encode('ascii')
         pwdhash = hashlib.pbkdf2_hmac(
-            'sha512', self.password.encode("utf-8"), salt, 100000)
+            'sha512', self.password.encode('utf-8'), salt, 100000)
         pwdhash = binascii.hexlify(pwdhash)
-        return (salt + pwdhash).decode("ascii")
+        return (salt + pwdhash).decode('ascii')
 
     def verify_password(self, stored_password, provided_password):
         """Verify a stored password against one provided by user"""
         salt = stored_password[:64]
-        stored_password = stored_password[:64]
+        stored_password = stored_password[64:]
         pwdhash = hashlib.pbkdf2_hmac('sha512', provided_password.encode(
-            'utf-8'), salt.encode('ascii'), 100000)
+            'utf-8'), salt.encode('ascii'),  100000)
         pwdhash = binascii.hexlify(pwdhash).decode('ascii')
         return pwdhash == stored_password
 
-    def get_random_user_password(self):
-        random_user = "".join(random.choice(
+    def get_random_user_pasword(self):
+        random_user = ''.join(random.choice(
             string.ascii_lowercase)for i in range(4))
         self.user = random_user
 
-        password_characters = string.ascii_letters  # string.digits + string.punctuation
-        random_password = "".join(random.choice(
+        # + string.digits + string.punctuation
+        password_characters = string.ascii_letters
+        random_password = ''.join(random.choice(
             password_characters)for i in range(4))
         self.password = random_password
-        print(random_password)
 
     def login_user(self):
 
         db = get_db()
-        sql_statement = "select id, name, email, password, is_active, is_admin from users where name=?"
+        sql_statement = 'select id, name, email, password, is_active, is_admin from users where name=?'
         cur = db.execute(sql_statement, [self.user])
         user_record = cur.fetchone()
 
@@ -115,33 +114,33 @@ class UserPass:
             return None
 
 
-@app.route("/init_app")
-def init():
+@app.route('/init_app')
+def init_app():
 
-    # check if there is users defined (at least one active admin required)
+    # check if there are users defined (at least one active admin required)
     db = get_db()
-    sql_statement = "select count(*) as cnt from users where is_active and is_admin;"
+    sql_statement = 'select count(*) as cnt from users where is_active and is_admin;'
     cur = db.execute(sql_statement)
     active_admins = cur.fetchone()
 
     if active_admins != None and active_admins['cnt'] > 0:
-        flash('Application is already set-up. Nothing to do.')
-        return redirect(url_for("index"))
+        flash('Application is already set-up. Nothing to do')
+        return redirect(url_for('index'))
 
     # if not - create/update admin account with a new password and admin privileges, display random username
     user_pass = UserPass()
-    user_pass.get_random_user_password()
-    sql_statement = """insert into users(name, email, password, is_active, is_admin)
-                        values(?,?,?, True, True);"""
+    user_pass.get_random_user_pasword()
+    sql_statement = '''insert into users(name, email, password, is_active, is_admin)
+                       values(?,?,?,True, True);'''
     db.execute(sql_statement, [user_pass.user,
                'noone@nowhere.no', user_pass.hash_password()])
     db.commit()
-    flash("User {} with password {} has been created".format(
+    flash('User {} with password {} has been created'.format(
         user_pass.user, user_pass.password))
-    return redirect(url_for("index"))
+    return redirect(url_for('index'))
 
 
-@app.route("/login", methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
 
     if request.method == 'GET':
@@ -167,7 +166,7 @@ def logout():
 
     if 'user' in session:
         session.pop('user', None)
-        flash("You are logged out")
+        flash('You are logged out')
     return redirect(url_for('login'))
 
 

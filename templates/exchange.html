@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="container">
-    <div class="row justify-content-start">
-        <div class="col-3 h1">New Order</div>
+    <div class="row mt-3">
+        <div class="col-3 h2">New Order</div>
     </div><br>
     <form id="exchange_form" action="{{ url_for('exchange')}}" method="POST">
-        <div class="row justify-content-start">
+        <div class="row mt-3">
             <div class="col-1 col-form-label"><label for="currency">Currency</label></div>
             <div class="col-4">
                 <select id="currency" name="currency" class="form-select">
@@ -16,14 +16,15 @@
                 </select><br>
             </div>
         </div><br>
-        <div class="row justify-content-start">    
+        <div class="row mt-1">    
             <div class="col-1 col-form-label"><label for="amount">Amount</label></div>
             <div class="col-4">
                 <input type="text" id="amount" name="amount" value="100" class="form-control"><br>
             <div>
-            <div class="row justify-content-start">
-                <div class="col-1"></div>
-                <div class="col-2"><input type="submit" value="Send" class="btn btn-primary"></div>
+            <div class="row mt-3">
+                <div class="col-0"></div>
+                <div class="col-4"><input type="submit" value="Send" class="btn btn-primary"></div>
+            </div>
         </div>
     </form>
 </div>
