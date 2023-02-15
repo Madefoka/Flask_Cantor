@@ -18,6 +18,14 @@
           <li class="nav-item">
             <a class="nav-link {{'active' if active_menu=='about'}}" href="#" tabindex="-1" aria-disabled="true">About</a>
           </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                      data-bs-toggle="dropdown" aria-expanded="false">Users</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="{{ url_for("users") }}">Users</a></li>
+              <li><a class="dropdown-item" href="{{ url_for("new_user") }}">New user</a></li>
+            </ul>
+          </li>
           <li class="nav-item">
             <a class="nav-link {{ 'active' if active_menu=='login' }}" href="{{ url_for('login') }}" tabindex="-1">Login</a>
           </li>
@@ -25,7 +33,6 @@
             <a class="nav-link {{ 'active' if active_menu=='logout' }}" href="{{ url_for('logout') }}" tabindex="-1">
               Logout {{ session['user'] if 'user' in session }}</a>
           </li>
-        
         </ul>
       </div>
     </div>
