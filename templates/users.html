@@ -60,8 +60,23 @@
             <th scope="row">{{ user.id }}</th>
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
-            <td>       </td>
-            <td>       </td>
+            <td><a href="{{ url_for("users_status_change", action="active", user_name=user.name) }}">
+                  {% if user.is_active %}
+                    &check;
+                  {% else %}
+                    &#x25a2;
+                  {% endif %}
+                </a>  
+            </td>
+            <td>
+              <a href="{{ url_for("users_status_change", action="admin", user_name=user.name) }}">
+                {% if user.is_admin %}
+                  &check;
+                {% else %}
+                  &#x25a2;
+                {% endif %}
+              </a>
+            </td>
             <td>
                 <a href="{{ url_for('edit_user', user_name=user.name) }}" 
                    class="btn btn-success btn-sm" role="button">Edit...</a>
